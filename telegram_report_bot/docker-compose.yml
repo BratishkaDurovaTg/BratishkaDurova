@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-servicetex}
+      POSTGRES_USER: ${POSTGRES_USER:-servicetex}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-servicetex} -d ${POSTGRES_DB:-servicetex}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-servicetex}:${POSTGRES_PASSWORD:-change_me}@postgres:5432/${POSTGRES_DB:-servicetex}
+    volumes:
+      - ./data:/app/data
+
+volumes:
+  postgres_data:

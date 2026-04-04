@@ -1,0 +1,17 @@
+[Unit]
+Description=ServiceTex Telegram Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/servicetex-bot
+EnvironmentFile=/opt/servicetex-bot/.env
+ExecStart=/opt/servicetex-bot/deploy/run_bot.sh
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target
