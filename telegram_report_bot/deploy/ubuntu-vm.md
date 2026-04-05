@@ -1,6 +1,17 @@
 # VM Deploy
 
-Ниже самый простой вариант деплоя на Ubuntu VM через `systemd`.
+Ниже старый вариант деплоя только для Telegram-бота через `systemd`.
+
+Для `ask 4` и официального требования с web app используйте:
+
+- [docker-vm.md](/Users/nikita/BratishkaDurova/telegram_report_bot/deploy/docker-vm.md)
+
+Именно там описан рекомендуемый production-сценарий для:
+
+- `bot`
+- `web app`
+- `postgres`
+- `public HTTPS domain`
 
 ## 1. Подготовить VM
 

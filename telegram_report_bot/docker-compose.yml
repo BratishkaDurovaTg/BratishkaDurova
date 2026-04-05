@@ -19,6 +19,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    command: ["python", "-u", "main.py"]
     restart: unless-stopped
     depends_on:
       postgres:
@@ -30,5 +31,38 @@ services:
     volumes:
       - ./data:/app/data
 
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["uvicorn", "employee_report_bot.web:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-servicetex}:${POSTGRES_PASSWORD:-change_me}@postgres:5432/${POSTGRES_DB:-servicetex}
+    volumes:
+      - ./data:/app/data
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - web
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:

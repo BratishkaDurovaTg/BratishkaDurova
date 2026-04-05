@@ -27,12 +27,12 @@ from telegram.ext import (
     filters,
 )
 
-from .config import load_settings
 from .excel_store import ExcelReportStore
 from .models import EmployeeReport
 from .postgres_store import PostgresProjectStore, PostgresReportStore
 from .project_store import ProjectStore
 from .report_parser import parse_report
+from .runtime import create_runtime
 from .transcriber import AudioTranscriber
 
 
@@ -57,19 +57,10 @@ ADMIN_ADD_PROJECT_KEY = "admin_awaiting_project_code"
 
 class EmployeeReportBot:
     def __init__(self) -> None:
-        self.settings = load_settings()
-        if self.settings.database_url:
-            self.project_store = PostgresProjectStore(
-                self.settings.database_url,
-                snapshot_path=self.settings.projects_path,
-            )
-            self.store = PostgresReportStore(
-                self.settings.database_url,
-                snapshot_path=self.settings.reports_xlsx_path,
-            )
-        else:
-            self.store = ExcelReportStore(self.settings.reports_xlsx_path)
-            self.project_store = ProjectStore(self.settings.projects_path)
+        runtime = create_runtime()
+        self.settings = runtime.settings
+        self.store: ExcelReportStore | PostgresReportStore = runtime.report_store
+        self.project_store: ProjectStore | PostgresProjectStore = runtime.project_store
         self.transcriber = AudioTranscriber(
             model_name=self.settings.whisper_model,
             device=self.settings.whisper_device,

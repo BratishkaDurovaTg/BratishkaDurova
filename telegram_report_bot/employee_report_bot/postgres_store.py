@@ -197,21 +197,79 @@ class PostgresReportStore:
                 cur.execute(query, params)
                 rows = cur.fetchall()
 
-        return [
-            {
-                "report_date": row["report_date"].isoformat(),
-                "updated_at": row["updated_at"].strftime(TIMESTAMP_FORMAT),
-                "project_code": row["project_code"],
-                "employee_name": row["employee_name"],
-                "telegram_username": row["telegram_username"],
-                "user_id": str(row["user_id"]),
-                "source": row["source"],
-                "fact_today": row["fact_today"],
-                "plan_tomorrow": row["plan_tomorrow"],
-                "parse_status": row["parse_status"],
-            }
-            for row in rows
-        ]
+        return [_row_to_report_dict(row) for row in rows]
+
+    def list_recent_reports(
+        self,
+        limit: int | None = 20,
+        project_code: str | None = None,
+    ) -> list[dict[str, str]]:
+        query = """
+            SELECT
+                report_date,
+                updated_at,
+                project_code,
+                employee_name,
+                telegram_username,
+                user_id,
+                chat_id,
+                message_id,
+                source,
+                telegram_file_id,
+                transcript,
+                fact_today,
+                plan_tomorrow,
+                parse_status
+            FROM reports
+        """
+        params: list[Any] = []
+        if project_code is not None:
+            query += " WHERE project_code = %s"
+            params.append(project_code)
+        query += " ORDER BY report_date DESC, updated_at DESC, employee_name ASC"
+        if limit is not None:
+            query += " LIMIT %s"
+            params.append(limit)
+
+        with connect(self._database_url, row_factory=dict_row) as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, params)
+                return [_row_to_report_dict(row) for row in cur.fetchall()]
+
+    def get_user_reports(
+        self,
+        user_id: int,
+        limit: int | None = 20,
+    ) -> list[dict[str, str]]:
+        query = """
+            SELECT
+                report_date,
+                updated_at,
+                project_code,
+                employee_name,
+                telegram_username,
+                user_id,
+                chat_id,
+                message_id,
+                source,
+                telegram_file_id,
+                transcript,
+                fact_today,
+                plan_tomorrow,
+                parse_status
+            FROM reports
+            WHERE user_id = %s
+            ORDER BY report_date DESC, updated_at DESC, project_code ASC
+        """
+        params: list[Any] = [user_id]
+        if limit is not None:
+            query += " LIMIT %s"
+            params.append(limit)
+
+        with connect(self._database_url, row_factory=dict_row) as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, params)
+                return [_row_to_report_dict(row) for row in cur.fetchall()]
 
     def export_reports(
         self,
@@ -537,3 +595,22 @@ def _finalize_sheet(sheet) -> None:
     last_column_letter = get_column_letter(sheet.max_column)
     sheet.freeze_panes = "A2"
     sheet.auto_filter.ref = f"A1:{last_column_letter}1"
+
+
+def _row_to_report_dict(row: dict[str, Any]) -> dict[str, str]:
+    return {
+        "report_date": row["report_date"].isoformat(),
+        "updated_at": row["updated_at"].strftime(TIMESTAMP_FORMAT),
+        "project_code": row["project_code"],
+        "employee_name": row["employee_name"],
+        "telegram_username": row["telegram_username"],
+        "user_id": str(row["user_id"]),
+        "chat_id": str(row.get("chat_id", "")),
+        "message_id": str(row.get("message_id", "")),
+        "source": row["source"],
+        "telegram_file_id": row.get("telegram_file_id", ""),
+        "transcript": row.get("transcript", ""),
+        "fact_today": row["fact_today"],
+        "plan_tomorrow": row["plan_tomorrow"],
+        "parse_status": row["parse_status"],
+    }

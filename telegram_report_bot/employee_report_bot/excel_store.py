@@ -68,33 +68,51 @@ class ExcelReportStore:
         report_date: str,
         project_code: str | None = None,
     ) -> list[dict[str, str]]:
+        reports = self._read_all_reports()
+        filtered_reports = [
+            report
+            for report in reports
+            if report["report_date"] == report_date
+            and (project_code is None or report["project_code"] == project_code)
+        ]
+        filtered_reports.sort(key=lambda report: report["updated_at"], reverse=True)
+        return filtered_reports
+
+    def list_recent_reports(
+        self,
+        limit: int | None = 20,
+        project_code: str | None = None,
+    ) -> list[dict[str, str]]:
+        reports = self._read_all_reports()
+        if project_code is not None:
+            reports = [report for report in reports if report["project_code"] == project_code]
+        reports.sort(key=lambda report: (report["report_date"], report["updated_at"]), reverse=True)
+        if limit is None:
+            return reports
+        return reports[:limit]
+
+    def get_user_reports(
+        self,
+        user_id: int,
+        limit: int | None = 20,
+    ) -> list[dict[str, str]]:
+        reports = [report for report in self._read_all_reports() if report["user_id"] == str(user_id)]
+        reports.sort(key=lambda report: (report["report_date"], report["updated_at"]), reverse=True)
+        if limit is None:
+            return reports
+        return reports[:limit]
+
+    def _read_all_reports(self) -> list[dict[str, str]]:
         workbook = self._load_or_create_workbook()
         sheet = workbook["Reports"]
         header_map = self._ensure_headers(sheet)
         reports: list[dict[str, str]] = []
 
         for row_index in range(2, sheet.max_row + 1):
-            row_date = str(sheet.cell(row=row_index, column=header_map["Report Date"]).value or "")
-            row_project = str(sheet.cell(row=row_index, column=header_map["Project Code"]).value or "")
-            if row_date != report_date:
+            report = self._build_report_dict(sheet, row_index, header_map)
+            if not report["report_date"] or not report["project_code"] or not report["user_id"]:
                 continue
-            if project_code is not None and row_project != project_code:
-                continue
-
-            reports.append(
-                {
-                    "report_date": row_date,
-                    "updated_at": str(sheet.cell(row=row_index, column=header_map["Updated At"]).value or ""),
-                    "project_code": row_project,
-                    "employee_name": str(sheet.cell(row=row_index, column=header_map["Employee Name"]).value or ""),
-                    "telegram_username": str(sheet.cell(row=row_index, column=header_map["Telegram Username"]).value or ""),
-                    "user_id": str(sheet.cell(row=row_index, column=header_map["User ID"]).value or ""),
-                    "source": str(sheet.cell(row=row_index, column=header_map["Source"]).value or ""),
-                    "fact_today": str(sheet.cell(row=row_index, column=header_map["Fact Today"]).value or ""),
-                    "plan_tomorrow": str(sheet.cell(row=row_index, column=header_map["Plan Tomorrow"]).value or ""),
-                    "parse_status": str(sheet.cell(row=row_index, column=header_map["Parse Status"]).value or ""),
-                }
-            )
+            reports.append(report)
 
         return reports
 
@@ -182,3 +200,26 @@ class ExcelReportStore:
             if row_date == report_date and row_user_id == str(user_id) and row_project == project_code:
                 return row_index
         return None
+
+    @staticmethod
+    def _build_report_dict(
+        sheet: Worksheet,
+        row_index: int,
+        header_map: dict[str, int],
+    ) -> dict[str, str]:
+        return {
+            "report_date": str(sheet.cell(row=row_index, column=header_map["Report Date"]).value or ""),
+            "updated_at": str(sheet.cell(row=row_index, column=header_map["Updated At"]).value or ""),
+            "project_code": str(sheet.cell(row=row_index, column=header_map["Project Code"]).value or ""),
+            "employee_name": str(sheet.cell(row=row_index, column=header_map["Employee Name"]).value or ""),
+            "telegram_username": str(sheet.cell(row=row_index, column=header_map["Telegram Username"]).value or ""),
+            "user_id": str(sheet.cell(row=row_index, column=header_map["User ID"]).value or ""),
+            "chat_id": str(sheet.cell(row=row_index, column=header_map["Chat ID"]).value or ""),
+            "message_id": str(sheet.cell(row=row_index, column=header_map["Message ID"]).value or ""),
+            "source": str(sheet.cell(row=row_index, column=header_map["Source"]).value or ""),
+            "telegram_file_id": str(sheet.cell(row=row_index, column=header_map["Telegram File ID"]).value or ""),
+            "transcript": str(sheet.cell(row=row_index, column=header_map["Transcript"]).value or ""),
+            "fact_today": str(sheet.cell(row=row_index, column=header_map["Fact Today"]).value or ""),
+            "plan_tomorrow": str(sheet.cell(row=row_index, column=header_map["Plan Tomorrow"]).value or ""),
+            "parse_status": str(sheet.cell(row=row_index, column=header_map["Parse Status"]).value or ""),
+        }

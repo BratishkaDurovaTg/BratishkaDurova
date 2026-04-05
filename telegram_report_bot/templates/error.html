@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero centered">
+  <div class="hero-panel glass-card">
+    <p class="panel-kicker">System Message</p>
+    <h1>{{ error_title }}</h1>
+    <p class="hero-text">{{ error_message }}</p>
+    <a class="button primary" href="/app">Back to dashboard</a>
+  </div>
+</section>
+{% endblock %}

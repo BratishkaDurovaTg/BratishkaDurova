@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/web.css">
+  </head>
+  <body>
+    <div class="bg-orb orb-one"></div>
+    <div class="bg-orb orb-two"></div>
+    <div class="bg-grid"></div>
+    <div class="page-shell">
+      <header class="topbar glass-card">
+        <div>
+          <a class="brand" href="/">
+            <span class="brand-mark"></span>
+            <span>{{ brand_name }}</span>
+          </a>
+          <p class="brand-subtitle">{{ brand_tagline }}</p>
+        </div>
+        <nav class="topnav">
+          <a href="/app">Dashboard</a>
+          {% if user and is_admin %}
+          <a href="/admin">Admin</a>
+          {% endif %}
+          {% if telegram_bot_url %}
+          <a href="{{ telegram_bot_url }}" target="_blank" rel="noreferrer">Open Bot</a>
+          {% endif %}
+          {% if user %}
+          <a class="button ghost" href="/logout">Logout</a>
+          {% endif %}
+        </nav>
+      </header>
+      <main>
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+</html>

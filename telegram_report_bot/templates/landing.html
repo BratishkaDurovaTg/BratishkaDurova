@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <span class="eyebrow">Telegram bot + web app + PostgreSQL</span>
+    <h1>{{ project_title }}</h1>
+    <p class="hero-text">
+      Тёмный control panel для ежедневных отчётов команды. Логин через Telegram,
+      проекты, сводка за сегодня и быстрый переход в бота.
+    </p>
+    <div class="hero-actions">
+      {% if telegram_bot_url %}
+      <a class="button primary" href="{{ telegram_bot_url }}" target="_blank" rel="noreferrer">Open Telegram Bot</a>
+      {% endif %}
+      <a class="button ghost" href="#login">Sign in</a>
+    </div>
+  </div>
+  <div class="hero-panel glass-card" id="login">
+    <p class="panel-kicker">Access</p>
+    <h2>Telegram Login</h2>
+    <p class="panel-text">
+      Авторизуйтесь тем же аккаунтом, которым пользуетесь в боте, чтобы открыть dashboard.
+    </p>
+    {% if auth_error %}
+    <div class="notice notice-error">{{ auth_error }}</div>
+    {% endif %}
+    {% if telegram_login_ready %}
+    <div class="widget-wrap">
+      <script async src="https://telegram.org/js/telegram-widget.js?22"
+              data-telegram-login="{{ telegram_bot_username }}"
+              data-size="large"
+              data-radius="16"
+              data-userpic="false"
+              data-auth-url="{{ telegram_auth_url }}"
+              data-request-access="write"></script>
+    </div>
+    {% else %}
+    <div class="notice">
+      Укажите <code>TELEGRAM_BOT_USERNAME</code> и <code>WEB_BASE_URL</code> в <code>.env</code>, затем привяжите домен через <code>@BotFather /setdomain</code>.
+    </div>
+    {% endif %}
+    <dl class="meta-list">
+      <div>
+        <dt>Domain</dt>
+        <dd>{{ web_domain or "not configured" }}</dd>
+      </div>
+      <div>
+        <dt>Brand</dt>
+        <dd>project by @BratishkaDurova</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<section class="card-grid">
+  <article class="glass-card feature-card">
+    <p class="panel-kicker">Live data</p>
+    <h3>Project Overview</h3>
+    <p>Список проектов, статус отчётов и свежая активность по сотрудникам.</p>
+  </article>
+  <article class="glass-card feature-card">
+    <p class="panel-kicker">Roles</p>
+    <h3>Admin + Employee</h3>
+    <p>Админ видит глобальную картину, сотрудник получает доступ к своим отчётам и связанным проектам.</p>
+  </article>
+  <article class="glass-card feature-card">
+    <p class="panel-kicker">Deployment</p>
+    <h3>Public HTTPS</h3>
+    <p>Работает на публичном домене, легко открывается с VM через Docker Compose и reverse proxy.</p>
+  </article>
+</section>
+{% endblock %}

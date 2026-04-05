@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from dotenv import load_dotenv
@@ -15,8 +16,13 @@ ENV_PATH = BASE_DIR / ".env"
 @dataclass(slots=True)
 class Settings:
     telegram_bot_token: str
+    telegram_bot_username: str
     database_url: str | None
     admin_user_ids: set[int]
+    web_base_url: str
+    web_domain: str
+    web_session_secret: str
+    telegram_auth_max_age_seconds: int
     reports_xlsx_path: Path
     projects_path: Path
     download_dir: Path
@@ -49,8 +55,19 @@ def load_settings() -> Settings:
 
     return Settings(
         telegram_bot_token=token,
+        telegram_bot_username=os.getenv("TELEGRAM_BOT_USERNAME", "").strip().lstrip("@"),
         database_url=os.getenv("DATABASE_URL", "").strip() or None,
         admin_user_ids=_parse_admin_user_ids(os.getenv("ADMIN_USER_IDS", "")),
+        web_base_url=_normalize_web_base_url(os.getenv("WEB_BASE_URL", "")),
+        web_domain=_resolve_web_domain(
+            os.getenv("WEB_DOMAIN", ""),
+            os.getenv("WEB_BASE_URL", ""),
+        ),
+        web_session_secret=os.getenv("WEB_SESSION_SECRET", "").strip() or f"{token}:web",
+        telegram_auth_max_age_seconds=_parse_positive_int(
+            os.getenv("TELEGRAM_AUTH_MAX_AGE_SECONDS", "86400"),
+            default=86400,
+        ),
         reports_xlsx_path=reports_xlsx_path,
         projects_path=projects_path,
         download_dir=download_dir,
@@ -79,3 +96,27 @@ def _parse_admin_user_ids(raw_value: str) -> set[int]:
             ) from exc
 
     return admin_user_ids
+
+
+def _normalize_web_base_url(raw_value: str) -> str:
+    return raw_value.strip().rstrip("/")
+
+
+def _resolve_web_domain(raw_domain: str, raw_base_url: str) -> str:
+    domain = raw_domain.strip().lower()
+    if domain:
+        return domain
+
+    base_url = _normalize_web_base_url(raw_base_url)
+    if not base_url:
+        return ""
+
+    return (urlparse(base_url).hostname or "").lower()
+
+
+def _parse_positive_int(raw_value: str, default: int) -> int:
+    try:
+        value = int((raw_value or "").strip())
+    except ValueError:
+        return default
+    return value if value > 0 else default
