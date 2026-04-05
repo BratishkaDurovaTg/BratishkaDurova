@@ -401,6 +401,8 @@ class PostgresReportStore:
 def _ensure_schema(database_url: str) -> None:
     with connect(database_url) as conn:
         with conn.cursor() as cur:
+            # Serialize bootstrap so bot and web can start together safely.
+            cur.execute("SELECT pg_advisory_xact_lock(%s)", (428114907511,))
             cur.execute(
                 """
                 CREATE TABLE IF NOT EXISTS projects (

@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -36,7 +36,7 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     @app.get("/", response_class=HTMLResponse)
-    async def landing(request: Request) -> HTMLResponse | RedirectResponse:
+    async def landing(request: Request) -> Response:
         user = _get_current_user(request)
         if user is not None:
             return RedirectResponse(url="/app", status_code=302)
@@ -51,7 +51,7 @@ def create_app() -> FastAPI:
         )
 
     @app.get("/auth/telegram", response_class=HTMLResponse)
-    async def telegram_auth(request: Request) -> HTMLResponse | RedirectResponse:
+    async def telegram_auth(request: Request) -> Response:
         raw_payload = dict(request.query_params)
         try:
             user = verify_telegram_login(
@@ -73,12 +73,12 @@ def create_app() -> FastAPI:
         return RedirectResponse(url="/app", status_code=302)
 
     @app.get("/logout")
-    async def logout(request: Request) -> RedirectResponse:
+    async def logout(request: Request) -> Response:
         request.session.clear()
         return RedirectResponse(url="/", status_code=302)
 
     @app.get("/app", response_class=HTMLResponse)
-    async def dashboard(request: Request) -> HTMLResponse | RedirectResponse:
+    async def dashboard(request: Request) -> Response:
         user = _get_current_user(request)
         if user is None:
             return RedirectResponse(url="/", status_code=302)
@@ -128,7 +128,7 @@ def create_app() -> FastAPI:
         )
 
     @app.get("/projects/{project_code}", response_class=HTMLResponse)
-    async def project_detail(request: Request, project_code: str) -> HTMLResponse | RedirectResponse:
+    async def project_detail(request: Request, project_code: str) -> Response:
         user = _get_current_user(request)
         if user is None:
             return RedirectResponse(url="/", status_code=302)
@@ -181,7 +181,7 @@ def create_app() -> FastAPI:
         )
 
     @app.get("/admin", response_class=HTMLResponse)
-    async def admin_dashboard(request: Request) -> HTMLResponse | RedirectResponse:
+    async def admin_dashboard(request: Request) -> Response:
         user = _get_current_user(request)
         if user is None:
             return RedirectResponse(url="/", status_code=302)
