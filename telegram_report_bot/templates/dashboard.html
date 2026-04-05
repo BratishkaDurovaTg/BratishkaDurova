@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <span class="eyebrow">Dashboard</span>
+    <h1>Welcome, {{ user.first_name or user.username or user.id }}</h1>
+    <p class="hero-text">Сегодня: {{ today }}. Здесь видно ваши отчёты, активность по проектам и статус разбора.</p>
+  </div>
+  {% if is_admin %}
+  <a class="button primary" href="/admin">Open Admin View</a>
+  {% endif %}
+</section>
+
+<section class="stats-grid">
+  <article class="glass-card stat-card">
+    <span class="stat-label">Today's Reports</span>
+    <strong>{{ today_total }}</strong>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Parsed</span>
+    <strong>{{ parsed_total }}</strong>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Need Review</span>
+    <strong>{{ review_total }}</strong>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">My Reports</span>
+    <strong>{{ my_report_count }}</strong>
+  </article>
+</section>
+
+<section class="dashboard-grid">
+  <article class="glass-card panel">
+    <div class="panel-head">
+      <div>
+        <p class="panel-kicker">Projects</p>
+        <h2>Workspace Status</h2>
+      </div>
+    </div>
+    <div class="project-grid">
+      {% for project in project_cards %}
+      <div class="project-card">
+        <div class="project-row">
+          <strong>{{ project.code }}</strong>
+          <span class="status-pill {% if project.can_view %}status-open{% else %}status-locked{% endif %}">
+            {% if project.can_view %}open{% else %}locked{% endif %}
+          </span>
+        </div>
+        <p>{{ project.today_total }} reports today</p>
+        <small>{{ project.parsed_total }} parsed, {{ project.needs_review }} review</small>
+        {% if project.can_view %}
+        <a class="text-link" href="/projects/{{ project.code }}">Open project</a>
+        {% else %}
+        <span class="muted-text">Open after first report or with admin access</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="glass-card panel">
+    <div class="panel-head">
+      <div>
+        <p class="panel-kicker">My Feed</p>
+        <h2>Latest Reports</h2>
+      </div>
+    </div>
+    <div class="report-list">
+      {% for report in my_reports %}
+      <article class="report-card">
+        <div class="report-head">
+          <strong>{{ report.project_code }}</strong>
+          <span>{{ report.report_date }}</span>
+        </div>
+        <p>{{ report.fact_today or report.transcript or "No fact detected yet." }}</p>
+        <small>{{ report.parse_status }} · {{ report.updated_at }}</small>
+        <a class="text-link" href="/reports/{{ report.report_date }}/{{ report.project_code }}/{{ report.user_id }}">Open full report</a>
+      </article>
+      {% else %}
+      <p class="muted-text">Пока нет отчётов. Отправьте первый отчёт через Telegram-бота.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="glass-card panel">
+  <div class="panel-head">
+    <div>
+      <p class="panel-kicker">Recent Activity</p>
+      <h2>{% if is_admin %}Global Feed{% else %}Your Latest Activity{% endif %}</h2>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Employee</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Open</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in recent_reports %}
+        <tr>
+          <td>{{ report.project_code }}</td>
+          <td>{{ report.employee_name or report.telegram_username or report.user_id }}</td>
+          <td>{{ report.updated_at }}</td>
+          <td>{{ report.parse_status }}</td>
+          <td>
+            <a class="text-link table-link" href="/reports/{{ report.report_date }}/{{ report.project_code }}/{{ report.user_id }}">
+              View
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5">No activity yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

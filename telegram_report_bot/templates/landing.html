@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero landing-hero landing-hero-centered">
+  <div class="hero-copy hero-copy-centered hero-copy-narrow">
+    <span class="eyebrow">Telegram bot + web app + PostgreSQL</span>
+    <h1>{{ project_title }}</h1>
+    <p class="hero-text hero-text-wide">
+      Тёмный control panel для ежедневных отчётов команды. Логин через Telegram,
+      проекты, сводка за сегодня, админский контроль и быстрый переход в полный текст каждого отчёта.
+    </p>
+    <div class="hero-actions hero-actions-centered">
+      {% if telegram_bot_url %}
+      <a class="button primary" href="{{ telegram_bot_url }}" target="_blank" rel="noreferrer">Open Telegram Bot</a>
+      {% endif %}
+      <a class="button ghost" href="#login-card">Sign in</a>
+    </div>
+</section>
+
+<section class="auth-section">
+  <div class="hero-panel glass-card auth-panel" id="login-card">
+    <p class="panel-kicker">Access</p>
+    <h2>Telegram Login</h2>
+    <p class="panel-text">
+      Авторизуйтесь тем же аккаунтом, которым пользуетесь в боте, чтобы открыть dashboard.
+    </p>
+    {% if auth_error %}
+    <div class="notice notice-error">{{ auth_error }}</div>
+    {% endif %}
+    {% if telegram_login_ready %}
+    <div class="widget-wrap">
+      <script async src="https://telegram.org/js/telegram-widget.js?22"
+              data-telegram-login="{{ telegram_bot_username }}"
+              data-size="large"
+              data-radius="16"
+              data-userpic="false"
+              data-auth-url="{{ telegram_auth_url }}"
+              data-request-access="write"></script>
+    </div>
+    {% else %}
+    <div class="notice">
+      Укажите <code>TELEGRAM_BOT_USERNAME</code> и <code>WEB_BASE_URL</code> в <code>.env</code>, затем привяжите домен через <code>@BotFather /setdomain</code>.
+    </div>
+    {% endif %}
+    <dl class="meta-list">
+      <div>
+        <dt>Domain</dt>
+        <dd>{{ web_domain or "not configured" }}</dd>
+      </div>
+      <div>
+        <dt>Brand</dt>
+        <dd>project by @BratishkaDurova</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<section class="stats-grid landing-stats">
+  <article class="glass-card stat-card">
+    <span class="stat-label">Visibility</span>
+    <strong>Live</strong>
+    <p class="stat-text">Проекты, сотрудники и статус разбора доступны в одном dashboard.</p>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Review</span>
+    <strong>Deep</strong>
+    <p class="stat-text">Админ может открыть конкретный отчёт и увидеть исходный текст, факт и план.</p>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Workflow</span>
+    <strong>Fast</strong>
+    <p class="stat-text">Telegram остаётся входом, а web app даёт удобную аналитику и контроль.</p>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Deploy</span>
+    <strong>VM</strong>
+    <p class="stat-text">Бот, web и PostgreSQL уже собраны в единую систему на сервере.</p>
+  </article>
+</section>
+
+<section class="card-grid card-grid-wide">
+  <article class="glass-card feature-card">
+    <p class="panel-kicker">Admin View</p>
+    <h3>Full Report Reading</h3>
+    <p>Откройте конкретный отчёт и проверьте, что именно сотрудник написал: полный transcript, fact today и plan tomorrow.</p>
+  </article>
+  <article class="glass-card feature-card">
+    <p class="panel-kicker">Project Spaces</p>
+    <h3>Project by Project</h3>
+    <p>Смотрите сводку по каждому проекту отдельно, сравнивайте динамику и быстро находите проблемные места.</p>
+  </article>
+  <article class="glass-card feature-card">
+    <p class="panel-kicker">Telegram Auth</p>
+    <h3>Same Identity</h3>
+    <p>Тот же Telegram-аккаунт используется и в боте, и в веб-интерфейсе, без отдельной регистрации.</p>
+  </article>
+</section>
+
+<section class="dashboard-grid landing-detail-grid">
+  <article class="glass-card panel">
+    <div class="panel-head">
+      <div>
+        <p class="panel-kicker">Why It Matters</p>
+        <h2>What You Can Do Inside</h2>
+      </div>
+    </div>
+    <div class="report-list">
+      <article class="report-card">
+        <div class="report-head">
+          <strong>1. Open the dashboard</strong>
+          <span>fast access</span>
+        </div>
+        <p>Сразу увидеть сводку за день, активность по проектам и общий статус отчётности.</p>
+      </article>
+      <article class="report-card">
+        <div class="report-head">
+          <strong>2. Drill into a project</strong>
+          <span>context</span>
+        </div>
+        <p>Понять, кто писал отчёты по проекту, что уже распарсилось, а что требует ручной проверки.</p>
+      </article>
+      <article class="report-card">
+        <div class="report-head">
+          <strong>3. Read full reports</strong>
+          <span>control</span>
+        </div>
+        <p>Открыть конкретный отчёт и проверить полный текст без необходимости идти в Excel или Telegram history.</p>
+      </article>
+    </div>
+  </article>
+
+  <article class="glass-card panel">
+    <div class="panel-head">
+      <div>
+        <p class="panel-kicker">Recent Updates</p>
+        <h2>What Changed Recently</h2>
+      </div>
+    </div>
+    <div class="report-list">
+      <article class="report-card">
+        <div class="report-head">
+          <strong>Expanded Admin Review</strong>
+          <span>new</span>
+        </div>
+        <p>Админка теперь умеет открывать конкретный отчёт и показывать полный текст, факт за сегодня и план на завтра.</p>
+        <small>Built for fast moderation and report quality control.</small>
+      </article>
+      <article class="report-card">
+        <div class="report-head">
+          <strong>Stronger Landing Flow</strong>
+          <span>refined</span>
+        </div>
+        <p>Главный экран стал чище и увереннее: hero по центру, login-блок сразу под ним, меньше лишнего шума.</p>
+        <small>Designed to feel closer to a polished product presentation.</small>
+      </article>
+      <article class="report-card">
+        <div class="report-head">
+          <strong>Unified Stack</strong>
+          <span>live</span>
+        </div>
+        <p>Telegram bot, web app и PostgreSQL работают как единая система: сбор отчётов, просмотр, аналитика и контроль в одном месте.</p>
+        <small>One workflow, one backend, one source of truth.</small>
+      </article>
+    </div>
+  </article>
+</section>
+
+<section class="glass-card panel landing-band">
+  <div class="panel-head">
+    <div>
+      <p class="panel-kicker">System View</p>
+      <h2>Built for Daily Team Reporting</h2>
+    </div>
+  </div>
+  <p class="hero-text">
+    ServiceTex соединяет Telegram bot, web dashboard и PostgreSQL в одну систему. Сотрудники продолжают отправлять отчёты в привычный интерфейс, а менеджер или админ получает нормальный веб-слой: авторизацию, навигацию, аналитику по проектам и чтение полной отчётности.
+  </p>
+</section>
+{% endblock %}

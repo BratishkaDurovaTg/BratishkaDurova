@@ -1,0 +1,38 @@
+name: Telegram Report Bot CI
+
+on:
+  push:
+    paths:
+      - "telegram_report_bot/**"
+      - ".github/workflows/telegram-report-bot-ci.yml"
+  pull_request:
+    paths:
+      - "telegram_report_bot/**"
+      - ".github/workflows/telegram-report-bot-ci.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: telegram_report_bot
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        working-directory: telegram_report_bot
+        run: python -m unittest discover -s tests -v
+
+      - name: Run syntax check
+        working-directory: telegram_report_bot
+        run: python -m py_compile main.py employee_report_bot/*.py

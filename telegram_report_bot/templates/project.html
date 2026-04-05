@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <span class="eyebrow">Project View</span>
+    <h1>{{ project_code }}</h1>
+    <p class="hero-text">Отчёты по проекту, разбивка на сегодня и последние обновления.</p>
+  </div>
+  <a class="button ghost" href="/app">Back to dashboard</a>
+</section>
+
+<section class="stats-grid">
+  <article class="glass-card stat-card">
+    <span class="stat-label">Today</span>
+    <strong>{{ today_reports|length }}</strong>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Parsed</span>
+    <strong>{{ parsed_total }}</strong>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Need Review</span>
+    <strong>{{ review_total }}</strong>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Date</span>
+    <strong>{{ today }}</strong>
+  </article>
+</section>
+
+<section class="dashboard-grid single-column">
+  <article class="glass-card panel">
+    <div class="panel-head">
+      <div>
+        <p class="panel-kicker">Today</p>
+        <h2>Reports for {{ project_code }}</h2>
+      </div>
+    </div>
+    <div class="report-list">
+      {% for report in today_reports %}
+      <article class="report-card">
+        <div class="report-head">
+          <strong>{{ report.employee_name or report.telegram_username or report.user_id }}</strong>
+          <span>{{ report.updated_at }}</span>
+        </div>
+        <p><b>Today:</b> {{ report.fact_today or "not extracted" }}</p>
+        <p><b>Tomorrow:</b> {{ report.plan_tomorrow or "not extracted" }}</p>
+        <small>{{ report.parse_status }}</small>
+      </article>
+      {% else %}
+      <p class="muted-text">Сегодня по этому проекту пока нет отчётов.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="glass-card panel">
+    <div class="panel-head">
+      <div>
+        <p class="panel-kicker">History</p>
+        <h2>Recent Timeline</h2>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Updated</th>
+            <th>Fact</th>
+            <th>Status</th>
+            <th>Open</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for report in recent_reports %}
+          <tr>
+            <td>{{ report.employee_name or report.telegram_username or report.user_id }}</td>
+            <td>{{ report.updated_at }}</td>
+            <td>{{ report.fact_today or report.transcript or "empty" }}</td>
+            <td>{{ report.parse_status }}</td>
+            <td>
+              <a class="text-link table-link" href="/reports/{{ report.report_date }}/{{ report.project_code }}/{{ report.user_id }}">
+                View
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5">No history yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+{% endblock %}
