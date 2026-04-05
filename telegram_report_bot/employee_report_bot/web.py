@@ -246,8 +246,9 @@ def _render(
 ) -> HTMLResponse:
     templates: Jinja2Templates = request.app.state.templates
     return templates.TemplateResponse(
-        template_name,
-        {
+        request=request,
+        name=template_name,
+        context={
             "request": request,
             "page_title": page_title,
             "brand_name": "ServiceTex",
