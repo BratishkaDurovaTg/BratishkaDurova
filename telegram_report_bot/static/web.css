@@ -173,6 +173,11 @@ code {
   min-height: 72vh;
 }
 
+.landing-hero-centered {
+  justify-content: center;
+  min-height: 56vh;
+}
+
 .hero.centered {
   justify-content: center;
 }
@@ -193,6 +198,11 @@ code {
   justify-content: center;
   text-align: center;
   min-height: 33rem;
+}
+
+.hero-copy-narrow {
+  max-width: 58rem;
+  margin: 0 auto;
 }
 
 .hero-panel,
@@ -254,33 +264,6 @@ code {
   justify-content: center;
 }
 
-.hero-metrics {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 28px;
-}
-
-.metric-chip {
-  min-width: 10rem;
-  padding: 14px 16px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.metric-chip span {
-  display: block;
-  color: var(--muted);
-  font-size: 0.82rem;
-  margin-bottom: 6px;
-}
-
-.metric-chip strong {
-  font-size: 1.05rem;
-}
-
 .widget-wrap {
   margin-top: 24px;
 }
@@ -289,9 +272,14 @@ code {
   scroll-margin-top: 110px;
 }
 
-.hero-panel-offset {
-  align-self: end;
-  margin-top: 108px;
+.auth-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.auth-panel {
+  width: min(100%, 44rem);
 }
 
 .notice {
@@ -544,10 +532,6 @@ code {
 
   .hero {
     min-height: auto;
-  }
-
-  .hero-panel-offset {
-    margin-top: 0;
   }
 
   .topnav {

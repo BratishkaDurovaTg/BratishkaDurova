@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="hero landing-hero">
-  <div class="hero-copy hero-copy-centered">
+<section class="hero landing-hero landing-hero-centered">
+  <div class="hero-copy hero-copy-centered hero-copy-narrow">
     <span class="eyebrow">Telegram bot + web app + PostgreSQL</span>
     <h1>{{ project_title }}</h1>
     <p class="hero-text hero-text-wide">
@@ -15,23 +15,10 @@
       {% endif %}
       <a class="button ghost" href="#login-card">Sign in</a>
     </div>
-    <div class="hero-metrics">
-      <div class="metric-chip">
-        <span>Projects</span>
-        <strong>{{ project_count }}</strong>
-      </div>
-      <div class="metric-chip">
-        <span>Reports</span>
-        <strong>{{ report_count }}</strong>
-      </div>
-      <div class="metric-chip">
-        <span>Mode</span>
-        <strong>Admin + Employee</strong>
-      </div>
-    </div>
-  </div>
+</section>
 
-  <div class="hero-panel glass-card hero-panel-offset" id="login-card">
+<section class="auth-section">
+  <div class="hero-panel glass-card auth-panel" id="login-card">
     <p class="panel-kicker">Access</p>
     <h2>Telegram Login</h2>
     <p class="panel-text">
@@ -145,23 +132,35 @@
   <article class="glass-card panel">
     <div class="panel-head">
       <div>
-        <p class="panel-kicker">Recent Feed</p>
-        <h2>Latest Reports Snapshot</h2>
+        <p class="panel-kicker">Recent Updates</p>
+        <h2>What Changed Recently</h2>
       </div>
     </div>
     <div class="report-list">
-      {% for report in preview_reports %}
       <article class="report-card">
         <div class="report-head">
-          <strong>{{ report.project_code }}</strong>
-          <span>{{ report.report_date }}</span>
+          <strong>Expanded Admin Review</strong>
+          <span>new</span>
         </div>
-        <p>{{ report.fact_today or report.transcript or "No text available yet." }}</p>
-        <small>{{ report.employee_name or report.telegram_username or report.user_id }} · {{ report.parse_status }}</small>
+        <p>Админка теперь умеет открывать конкретный отчёт и показывать полный текст, факт за сегодня и план на завтра.</p>
+        <small>Built for fast moderation and report quality control.</small>
       </article>
-      {% else %}
-      <p class="muted-text">Пока нет данных для превью. Отправьте первый отчёт через бота.</p>
-      {% endfor %}
+      <article class="report-card">
+        <div class="report-head">
+          <strong>Stronger Landing Flow</strong>
+          <span>refined</span>
+        </div>
+        <p>Главный экран стал чище и увереннее: hero по центру, login-блок сразу под ним, меньше лишнего шума.</p>
+        <small>Designed to feel closer to a polished product presentation.</small>
+      </article>
+      <article class="report-card">
+        <div class="report-head">
+          <strong>Unified Stack</strong>
+          <span>live</span>
+        </div>
+        <p>Telegram bot, web app и PostgreSQL работают как единая система: сбор отчётов, просмотр, аналитика и контроль в одном месте.</p>
+        <small>One workflow, one backend, one source of truth.</small>
+      </article>
     </div>
   </article>
 </section>
