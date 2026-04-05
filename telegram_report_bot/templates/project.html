@@ -69,6 +69,7 @@
             <th>Updated</th>
             <th>Fact</th>
             <th>Status</th>
+            <th>Open</th>
           </tr>
         </thead>
         <tbody>
@@ -78,10 +79,15 @@
             <td>{{ report.updated_at }}</td>
             <td>{{ report.fact_today or report.transcript or "empty" }}</td>
             <td>{{ report.parse_status }}</td>
+            <td>
+              <a class="text-link table-link" href="/reports/{{ report.report_date }}/{{ report.project_code }}/{{ report.user_id }}">
+                View
+              </a>
+            </td>
           </tr>
           {% else %}
           <tr>
-            <td colspan="4">No history yet.</td>
+            <td colspan="5">No history yet.</td>
           </tr>
           {% endfor %}
         </tbody>

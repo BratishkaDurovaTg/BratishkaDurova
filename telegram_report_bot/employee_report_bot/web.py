@@ -41,6 +41,8 @@ def create_app() -> FastAPI:
         if user is not None:
             return RedirectResponse(url="/app", status_code=302)
 
+        preview_reports = runtime.report_store.list_recent_reports(limit=3)
+
         return _render(
             request,
             "landing.html",
@@ -48,6 +50,9 @@ def create_app() -> FastAPI:
             user=None,
             page_title="ServiceTex Web",
             auth_error=None,
+            project_count=len(runtime.project_store.list_projects()),
+            report_count=len(runtime.report_store.list_recent_reports(limit=None)),
+            preview_reports=preview_reports,
         )
 
     @app.get("/auth/telegram", response_class=HTMLResponse)
@@ -232,6 +237,53 @@ def create_app() -> FastAPI:
             recent_reports=runtime.report_store.list_recent_reports(limit=20),
         )
 
+    @app.get("/reports/{report_date}/{project_code}/{user_id}", response_class=HTMLResponse)
+    async def report_detail(
+        request: Request,
+        report_date: str,
+        project_code: str,
+        user_id: int,
+    ) -> Response:
+        user = _get_current_user(request)
+        if user is None:
+            return RedirectResponse(url="/", status_code=302)
+
+        is_admin = _is_admin(runtime, user["id"])
+        report = _find_report(runtime, report_date, project_code, user_id)
+        if report is None:
+            return _render(
+                request,
+                "error.html",
+                runtime,
+                user=user,
+                page_title="Report Not Found",
+                is_admin=is_admin,
+                error_title="Отчёт не найден",
+                error_message="Похоже, этот отчёт уже удалён или ссылка устарела.",
+            )
+
+        if not is_admin and int(str(report["user_id"])) != int(user["id"]):
+            return _render(
+                request,
+                "error.html",
+                runtime,
+                user=user,
+                page_title="Access Denied",
+                is_admin=is_admin,
+                error_title="Доступ ограничен",
+                error_message="Открывать полный текст чужого отчёта может только администратор.",
+            )
+
+        return _render(
+            request,
+            "report_detail.html",
+            runtime,
+            user=user,
+            page_title=f"Report {project_code}",
+            is_admin=is_admin,
+            report=report,
+        )
+
     return app
 
 
@@ -288,3 +340,19 @@ def _build_bot_url(bot_username: str) -> str | None:
 def _build_telegram_auth_url(web_base_url: str) -> str:
     base_url = web_base_url.rstrip("/")
     return f"{base_url}/auth/telegram" if base_url else "/auth/telegram"
+
+
+def _find_report(
+    runtime: AppRuntime,
+    report_date: str,
+    project_code: str,
+    user_id: int,
+) -> dict[str, str] | None:
+    reports = runtime.report_store.list_recent_reports(limit=None, project_code=project_code)
+    for report in reports:
+        if report["report_date"] != report_date:
+            continue
+        if str(report["user_id"]) != str(user_id):
+            continue
+        return report
+    return None

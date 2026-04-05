@@ -67,6 +67,7 @@
             <th>Employee</th>
             <th>Updated</th>
             <th>Status</th>
+            <th>Open</th>
           </tr>
         </thead>
         <tbody>
@@ -76,10 +77,15 @@
             <td>{{ report.employee_name or report.telegram_username or report.user_id }}</td>
             <td>{{ report.updated_at }}</td>
             <td>{{ report.parse_status }}</td>
+            <td>
+              <a class="text-link table-link" href="/reports/{{ report.report_date }}/{{ report.project_code }}/{{ report.user_id }}">
+                View report
+              </a>
+            </td>
           </tr>
           {% else %}
           <tr>
-            <td colspan="4">No reports yet.</td>
+            <td colspan="5">No reports yet.</td>
           </tr>
           {% endfor %}
         </tbody>

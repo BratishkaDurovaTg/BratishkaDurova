@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section-head">
+  <div>
+    <span class="eyebrow">Report Detail</span>
+    <h1>{{ report.project_code }} / {{ report.report_date }}</h1>
+    <p class="hero-text">
+      Полная карточка отчёта сотрудника: исходный текст, выжимка за сегодня и план на завтра.
+    </p>
+  </div>
+  <a class="button ghost" href="{% if is_admin %}/admin{% else %}/app{% endif %}">Back</a>
+</section>
+
+<section class="stats-grid">
+  <article class="glass-card stat-card">
+    <span class="stat-label">Employee</span>
+    <strong>{{ report.employee_name or report.telegram_username or report.user_id }}</strong>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Project</span>
+    <strong>{{ report.project_code }}</strong>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Updated</span>
+    <strong>{{ report.updated_at }}</strong>
+  </article>
+  <article class="glass-card stat-card">
+    <span class="stat-label">Status</span>
+    <strong>{{ report.parse_status }}</strong>
+  </article>
+</section>
+
+<section class="dashboard-grid single-column">
+  <article class="glass-card panel">
+    <div class="panel-head">
+      <div>
+        <p class="panel-kicker">Summary</p>
+        <h2>Structured Output</h2>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-block">
+        <h3>Fact Today</h3>
+        <p>{{ report.fact_today or "No extracted fact yet." }}</p>
+      </div>
+      <div class="detail-block">
+        <h3>Plan Tomorrow</h3>
+        <p>{{ report.plan_tomorrow or "No extracted plan yet." }}</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="glass-card panel">
+    <div class="panel-head">
+      <div>
+        <p class="panel-kicker">Raw Report</p>
+        <h2>Transcript</h2>
+      </div>
+    </div>
+    <div class="detail-block detail-transcript">
+      <p>{{ report.transcript or "Transcript is empty." }}</p>
+    </div>
+  </article>
+</section>
+{% endblock %}
